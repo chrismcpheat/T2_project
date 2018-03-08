@@ -6,6 +6,8 @@ from tkinter import *
 from functools import partial
 
 
+### TESTING BRANCH ###
+
 class ClientGUI():
     def __init__(self, master):
         # upper frame and its contents
@@ -71,6 +73,7 @@ class ClientGUI():
 
             self.windowLog.insert(0.0, load_response)
             self.windowLog.insert(0.0, "\n")
+
 
 if __name__ == '__main__':
     # tkinter gui
