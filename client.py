@@ -72,6 +72,7 @@ class ClientGUI():
             self.windowLog.insert(0.0, load_response)
             self.windowLog.insert(0.0, "\n")
 
+
 if __name__ == '__main__':
     # tkinter gui
     # create root
