@@ -2,6 +2,7 @@ import wmi
 
 debug = False
 
+
 class OHM:
 
     def __init__(self):
@@ -40,7 +41,7 @@ class OHM:
 
         for load in sensors_load:
             if (load.Identifier.find("ram") == -1) and (load.Identifier.find("hdd") == -1) and (
-                load.Name.find("Total") == -1):
+                    load.Name.find("Total") == -1):
 
                 if debug:
                     print(f"{load.value}, {load.name}")
@@ -50,6 +51,26 @@ class OHM:
 
         return data
 
+    def get_clock_speeds(self):
+        data = {}
+        sensors_speed = self.hwmon.Sensor(SensorType="Clock")
+
+        if debug:
+            print(sensors_speed)
+
+        for speed in sensors_speed:
+            if (speed.Identifier.find("ram") == -1) and (speed.Identifier.find("hdd") == -1) and (
+                    speed.Name.find("Total") == -1):
+
+                if debug:
+                    print(f"{speed.value}, {speed.name}")
+
+                data['type'] = "clock speeds"
+                data[speed.name] = speed.value
+
+        return data
+
+
 if __name__ == '__main__':
 
     my_ohm = OHM()
@@ -57,3 +78,5 @@ if __name__ == '__main__':
     print(core_temps)
     core_loads = my_ohm.get_core_loads()
     print(core_loads)
+    clock_speeds = my_ohm.get_clock_speeds()
+    print(clock_speeds)
