@@ -34,6 +34,9 @@ class ClientGUI():
         loadBtn = Button(btnFrame, text="Load", command=partial(self.GetLoad))
         loadBtn.grid(row=0, column=1, padx=10, pady=2)
 
+        loadBtn = Button(btnFrame, text="Test3", command=partial(self.GetLoad))
+        loadBtn.grid(row=0, column=3, padx=10, pady=2)
+
     def GetTemp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
