@@ -6,8 +6,6 @@ from tkinter import *
 from functools import partial
 
 
-### TESTING BRANCH ###
-
 class ClientGUI():
     def __init__(self, master):
         # upper frame and its contents
