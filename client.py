@@ -34,6 +34,7 @@ class ClientGUI():
         loadBtn = Button(btnFrame, text="Load", command=partial(self.GetLoad))
         loadBtn.grid(row=0, column=1, padx=10, pady=2)
 
+        # added 3rd button as test
         loadBtn = Button(btnFrame, text="Test3", command=partial(self.GetLoad))
         loadBtn.grid(row=0, column=3, padx=10, pady=2)
 
