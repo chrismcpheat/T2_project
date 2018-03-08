@@ -5,6 +5,7 @@ from network_config import HOST, PORT
 from OHM import OHM
 import json
 
+
 class TCPRequestHandler(socketserver.BaseRequestHandler):
     """
     The request handler receives the response data from the client
@@ -33,6 +34,8 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
         if request['type'] == 'request':
             if request['param'] == 'cpu_core_temp':
                 requested_data = my_ohm.get_core_temps()
+            elif request['param'] == "clock_speeds":
+                requested_data = my_ohm.get_clock_speeds()
             elif request['param'] == "cpu_core_load":
                 requested_data = my_ohm.get_core_loads()
 
@@ -41,10 +44,12 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
         response = json.dumps(requested_data)
         self.request.sendall(response.encode('utf-8'))
 
+
 def main():
     with socketserver.TCPServer((HOST, PORT), TCPRequestHandler) as server:
         print("starting server")
         server.serve_forever()
+
 
 if __name__ == '__main__':
     main()

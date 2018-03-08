@@ -27,16 +27,15 @@ class ClientGUI():
         self.windowLog.grid(row=2, column=0, padx=10, pady=2)
 
         # pressing a button can trigger a function call (and we can pass input arguments / parameters)
-        #  https://pythonprogramming.net/passing-functions-parameters-tkinter-using-lambda/
+        # https://pythonprogramming.net/passing-functions-parameters-tkinter-using-lambda/
         tempBtn = Button(btnFrame, text="Temp", command=partial(self.GetTemp))
         tempBtn.grid(row=0, column=0, padx=10, pady=2)
 
         loadBtn = Button(btnFrame, text="Load", command=partial(self.GetLoad))
         loadBtn.grid(row=0, column=1, padx=10, pady=2)
 
-        # added 3rd button as test
-        loadBtn = Button(btnFrame, text="Test3", command=partial(self.GetLoad))
-        loadBtn.grid(row=0, column=3, padx=10, pady=2)
+        clockBtn = Button(btnFrame, text="Clock", command=partial(self.GetClock))
+        clockBtn.grid(row=0, column=2, padx=10, pady=2)
 
     def GetTemp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -67,6 +66,26 @@ class ClientGUI():
             # request cpu load data from the server
             request = {"type": "request",
                        "param": "cpu_core_load"}
+            print(f"client sent: {request}")
+            sock.sendall(bytes(json.dumps(request), "utf-8"))
+            print("load request sent...")
+
+            # Receive load data from the server
+            load_response = str(sock.recv(2048), "utf-8")
+            print(f"server load received: {load_response}")
+
+            self.windowLog.insert(0.0, load_response)
+            self.windowLog.insert(0.0, "\n")
+
+    def GetClock(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            # Connect to server and send data
+            print("connecting again...")
+            sock.connect((HOST, PORT))
+
+            # request cpu load data from the server
+            request = {"type": "request",
+                       "param": "clock_speeds"}
             print(f"client sent: {request}")
             sock.sendall(bytes(json.dumps(request), "utf-8"))
             print("load request sent...")
