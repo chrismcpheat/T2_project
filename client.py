@@ -1,6 +1,6 @@
 import socket
 import json
-from tcp_settings import HOST, PORT
+from tcp_settings import IP, PORT
 import tkinter
 from tkinter import *
 from functools import partial
@@ -39,7 +39,7 @@ class ClientGUI():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
             print("connecting...")
-            sock.connect((HOST, PORT))
+            sock.connect((IP, PORT))
 
             # request cpu temperature data from the server
             request = {"type": "request",
@@ -59,7 +59,7 @@ class ClientGUI():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
             print("connecting again...")
-            sock.connect((HOST, PORT))
+            sock.connect((IP, PORT))
 
             # request cpu load data from the server
             request = {"type": "request",
@@ -79,7 +79,7 @@ class ClientGUI():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
             print("connecting again...")
-            sock.connect((HOST, PORT))
+            sock.connect((IP, PORT))
 
             # request cpu load data from the server
             request = {"type": "request",

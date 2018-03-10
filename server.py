@@ -1,6 +1,6 @@
 import socketserver
 import time
-from tcp_settings import HOST, PORT
+from tcp_settings import IP, PORT
 
 from OHM import OHM
 import json
@@ -46,7 +46,7 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
 
 
 def main():
-    with socketserver.TCPServer((HOST, PORT), TCPRequestHandler) as server:
+    with socketserver.TCPServer((IP, PORT), TCPRequestHandler) as server:
         print("starting server")
         server.serve_forever()
 
