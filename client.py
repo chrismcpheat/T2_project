@@ -1,6 +1,6 @@
 import socket
 import json
-from network_config import HOST, PORT
+from tcp_settings import HOST, PORT
 import tkinter
 from tkinter import *
 from functools import partial
@@ -9,7 +9,7 @@ from functools import partial
 class ClientGUI():
     def __init__(self, master):
         # upper frame and its contents
-        upperFrame = Frame(master, width=50, height=30)
+        upperFrame = Frame(master, width=50, height=100)
         upperFrame.grid(row=0, column=0, padx=10, pady=2)
 
         # Right Frame and its contents
@@ -27,13 +27,13 @@ class ClientGUI():
         # pressing a button can trigger a function call (and we can pass input arguments / parameters)
         # https://pythonprogramming.net/passing-functions-parameters-tkinter-using-lambda/
         tempBtn = Button(btnFrame, text="Temp", command=partial(self.GetTemp))
-        tempBtn.grid(row=0, column=0, padx=10, pady=2)
+        tempBtn.grid(row=0, column=0, padx=40, pady=2)
 
         loadBtn = Button(btnFrame, text="Load", command=partial(self.GetLoad))
-        loadBtn.grid(row=0, column=1, padx=10, pady=2)
+        loadBtn.grid(row=0, column=1, padx=40, pady=2)
 
         clockBtn = Button(btnFrame, text="Clock", command=partial(self.GetClock))
-        clockBtn.grid(row=0, column=2, padx=10, pady=2)
+        clockBtn.grid(row=0, column=2, padx=40, pady=2)
 
     def GetTemp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:

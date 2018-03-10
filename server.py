@@ -1,6 +1,6 @@
 import socketserver
 import time
-from network_config import HOST, PORT
+from tcp_settings import HOST, PORT
 
 from OHM import OHM
 import json
