@@ -8,41 +8,61 @@ import tkinter
 from tkinter import *
 from functools import partial
 
-root = Tk()
-
 
 class ClientGUI:
 
+    # test function for dropdown menu
+    def doNothing(self):
+        print("ok, ok I won't...")
+
     def __init__(self, master):  # constructor - creates frame and positions in centre of window
 
+        # main window
         main_frame = Frame(master, width=1200, height=1200, bg="#f9f9f9")  # creates frame and sets colour to light grey
         main_frame.pack()  # places frame in window
 
+        # config for title and icon
         root.title("ScanWare")  # sets window title to 'ScanWare'
         root.iconbitmap(r'c:\t2\icon.ico')  # sets window icon to custom-made icon
 
+        # dropdown menu bar
+        menu = Menu(root)
+        root.config(menu=menu)
+
+        # 'File' menu
+        fileMenu = Menu(menu, tearoff=0)
+        menu.add_cascade(label="File", menu=fileMenu)
+        fileMenu.add_command(label="New Project", command=partial(self.doNothing))
+        fileMenu.add_command(label="New", command=partial(self.doNothing))
+        fileMenu.add_separator()
+        fileMenu.add_command(label="Exit", command=root.destroy)
+
+        # 'Edit' menu
+        editMenu = Menu(menu, tearoff=0)
+        menu.add_cascade(label="Edit", menu=editMenu)
+        editMenu.add_command(label="Redo", command=partial(self.doNothing))
+
+        # creates text box for data
         self.windowLog = Text(main_frame, takefocus=0)
         self.windowLog.grid(column=1, padx=10, pady=10)
 
+        # creates left frame for labels and buttons
         leftFrame = Frame(main_frame, width=50, height=50, bg="#f9f9f9")
         leftFrame.grid(row=0, column=0, padx=10, pady=2)
 
         # CPU label and buttons
         label_cpu = Label(leftFrame, text="CPU")
-        label_cpu.grid(row=0, column=0, padx=40, pady=10, sticky=W)
-
+        label_cpu.grid(row=0, column=0, padx=10, pady=10, sticky=W)
         btn_cpu_temp = Button(leftFrame, text="Temperature", width=10, command=partial(self.GetTemp))
-        btn_cpu_temp.grid(row=1, column=0, padx=40, pady=10)
-
+        btn_cpu_temp.grid(row=1, column=0, padx=10, pady=5, sticky=W)
         btn_cpu_load = Button(leftFrame, text="Load Times", width=10, command=partial(self.GetLoad))
-        btn_cpu_load.grid(row=2, column=0, padx=40, pady=10)
+        btn_cpu_load.grid(row=2, column=0, padx=10, pady=5, sticky=W)
 
         # clock label and buttons
         label_clock = Label(leftFrame, text="Clocks")
-        label_clock.grid(row=3, column=0, padx=40, pady=10, sticky=W)
-
+        label_clock.grid(row=3, column=0, padx=10, pady=10, sticky=W)
         btn_clock = Button(leftFrame, text="Speed", width=10, command=partial(self.GetClock))
-        btn_clock.grid(row=4, column=0, padx=40, pady=10)
+        btn_clock.grid(row=4, column=0, padx=10, pady=5, sticky=W)
 
     def GetTemp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -105,17 +125,20 @@ class ClientGUI:
             self.windowLog.insert(0.0, "\n")
 
     """
-    def win_center(self):
-        master.update_idletasks()  # calls all pending idle tasks to ensure that measurements of window are accurate,
+    def center(self):
+        self.update_idletasks()  # calls all pending idle tasks to ensure that measurements of window are accurate,
         x_win = self.winfo_screenwidth()  # measures size of window along X axis
         y_win = self.winfo_screenheight()  # measures size of window along Y axis
         size = tuple(int(_) for _ in self.geometry().split('+')[0].split('x'))
         x_pos = x_win / 2 - size[0] / 2  # calculates position of window along X axis
         y_pos = y_win / 2 - size[1] / 2  # calculates position of window along Y axis
-        self.geometry("%dx%d+%d+%d" % (size + (x_pos, y_pos)))  # combines size plus positions to centre the frame
+        self.geometry("%dx%d+%d+    %d" % (size + (x_pos, y_pos)))  # combines size plus positions to centre the frame
         """
 
 
 if __name__ == '__main__':
+
+    root = Tk()
     ClientGUI(root)
+
     root.mainloop()
