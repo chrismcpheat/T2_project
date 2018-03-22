@@ -70,6 +70,24 @@ class OHM:
 
         return data
 
+    def get_core_powers(self):
+        data = {}
+        sensors_power = self.hwmon.Sensor(SensorType="Power")
+
+        if debug:
+            print(sensors_power)
+
+        for power in sensors_power:
+            if (power.Identifier.find("ram") == -1) and (power.Identifier.find("hdd") == -1) and (
+                    power.Name.find("Total") == -1):
+
+                if debug:
+                    print(f"{power.value}, {power.name}")
+
+                data['type'] = "cpu powers"
+                data[power.name] = power.value
+
+        return data
 
 if __name__ == '__main__':
 
@@ -80,3 +98,5 @@ if __name__ == '__main__':
     print(core_loads)
     clock_speeds = my_ohm.get_clock_speeds()
     print(clock_speeds)
+    cpu_powers = my_ohm.get_core_powers()
+    print(cpu_powers)

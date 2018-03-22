@@ -22,7 +22,7 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
         """
         The request handler class.
         """
-        print("client data incoming...")
+        # print("client data incoming...")
         #  self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip().decode("utf-8")  # NB bytes to string
         # print(f"data received: {self.data}")
@@ -38,6 +38,8 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
                 requested_data = my_ohm.get_clock_speeds()
             elif request['param'] == "cpu_core_load":
                 requested_data = my_ohm.get_core_loads()
+            elif request['param'] == "cpu_core_power":
+                requested_data = my_ohm.get_core_powers()
 
         # print(requested_data)
         # return the data to the client
