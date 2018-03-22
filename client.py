@@ -14,6 +14,9 @@ import time
 import numpy as np
 
 
+def enum(**named_values):
+    return type('Enum', (), named_values)
+Buttons = enum(TEMP='temp', LOAD='load', CLOCK='clock')
 
 class ClientGUI(tkinter.Frame):
 
@@ -31,7 +34,7 @@ class ClientGUI(tkinter.Frame):
 
         # set title and icon of application
         self.winfo_toplevel().title("ScanWare")
-        self.winfo_toplevel().iconbitmap(r'c:\t2\icon.ico')
+        # self.winfo_toplevel().iconbitmap(r'c:\t2\icon.ico')
 
         # dropdown menu bar
         menuBar = Menu(master=root)
@@ -68,29 +71,61 @@ class ClientGUI(tkinter.Frame):
 
         # --- buttons and commands
         # temperature
-        self.temp_button = tkinter.Button(leftFrame, text="Temperature", width=15, command=lambda: self.plot(canvas,ax))
+        self.temp_button = tkinter.Button(leftFrame, text="Temperature", width=15, command=self.GetTemp)
         self.temp_button.grid(row=1, column=0, padx=10, pady=5, sticky=W)
         # load time
-        # self.load_button = tkinter.Button(leftFrame, text="Load Time", width=15, command=lambda: self.plot(canvas, ax))
-        # self.load_button.grid(row=2, column=0, padx=10, pady=5, sticky=W)
         self.load_button = tkinter.Button(leftFrame, text="Load Time", width=15, command=self.GetLoad)
         self.load_button.grid(row=2, column=0, padx=10, pady=5, sticky=W)
         # clock speed
-        self.clock_button = tkinter.Button(leftFrame, text="Clock Speed", width=15, command=lambda: self.plot(canvas, ax))
+        self.clock_button = tkinter.Button(leftFrame, text="Clock Speed", width=15, command=self.GetClock)
         self.clock_button.grid(row=4, column=0, padx=10, pady=5, sticky=W)
         # reset
-        self.reset_button = tkinter.Button(master=root, text="Reset", width=15, command=lambda: self.reset(canvas, ax))
+        self.reset_button = tkinter.Button(master=root, text="Reset", width=15, command=lambda: self.reset())
         self.reset_button.grid(row=2, column=1, pady=20)
 
         # create canvas and graph in right frame
         mpl.rc('axes', edgecolor='b')
         fig=plt.figure(figsize=(8,6))
-        ax=fig.add_axes([0.1,0.1,0.8,0.8],polar=False)
-        canvas = FigureCanvasTkAgg(fig, rightFrame)
-        canvas.get_tk_widget().grid(row=0,column=1)
-        canvas.draw()
+        self.ax0 = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=False)
+        self.ax1 = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=False)
+        self.ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=False)
+        self.canvas = FigureCanvasTkAgg(fig, rightFrame)
+        self.canvas.get_tk_widget().grid(row=0,column=1)
+        self.canvas.draw()
+
+        # --- empty lists for temperature, loads and clock speeds for X and Y axes of graphs
+        # temperature
+        self.temp_c1_x = []
+        self.temp_c1_y = []
+        self.temp_c2_y = []
+        # load times
+        self.load_c1_x = []
+        self.load_c1_y = []
+        self.load_c2_y = []
+        # clock speeds
+        self.clock_c1_x = []
+        self.clock_c1_y = []
+        self.clock_c2_y = []
+        self.clock_bs_y = []
+
+        # sets default button state to 'temp' - this will enumarate each time a different button is pressed
+        self.prev_button_state = Buttons
+        self.prev_button_state = Buttons.TEMP
+
+
+    def extract_value_message(self, message, key):
+        # extract value by key from the string message
+        print(message)
+        data_json = json.loads(message)
+        print(data_json[key])
+        val = int(data_json[key])
+        return val
 
     def GetTemp(self):
+        if self.prev_button_state != Buttons.TEMP:
+            self.reset()
+            self.prev_button_state = Buttons.TEMP
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
             print("connecting...")
@@ -103,14 +138,29 @@ class ClientGUI(tkinter.Frame):
             sock.sendall(bytes(json.dumps(request), "utf-8"))
             print("temp request sent...")
 
-            # Receive temperature data from the server
-            temp_response = str(sock.recv(1024), "utf-8")
-            print(f"server temp received: {temp_response}")
+            response = str(sock.recv(1024), "utf-8")
+            val1 = self.extract_value_message(response, "CPU Core #1")
+            val2 = self.extract_value_message(response, "CPU Core #2")
 
-            self.windowLog.insert(0.0, temp_response)
-            self.windowLog.insert(0.0, "\n")
+
+            x = time.time()
+            x = x - self.starttime
+            y1 = val1
+            y2 = val2
+
+            self.temp_c1_x.append(x)
+            self.temp_c1_y.append(y1)
+            self.temp_c2_y.append(y2)
+
+            self.plot(self.temp_c1_x, self.temp_c1_y, 0)
+            self.plot(self.temp_c1_x, self.temp_c2_y, 1)
+
 
     def GetLoad(self):
+        if self.prev_button_state != Buttons.LOAD:
+            self.reset()
+            self.prev_button_state = Buttons.LOAD
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
             #print("connecting again...")
@@ -124,51 +174,92 @@ class ClientGUI(tkinter.Frame):
             #print("load request sent...")
 
             # Receive load data from the server
-            load_response = str(sock.recv(2048), "utf-8")
-            print(f"server load received: {load_response}")
-            load_time = json.loads(load_response)
-            core1 = load_time['CPU Core #1']
-            core2 = load_time['CPU Core #2']
-            print(core1)
-            print(core2)
+            response = str(sock.recv(2048), "utf-8")
+            val1 = self.extract_value_message(response, "CPU Core #1")
+            val2 = self.extract_value_message(response, "CPU Core #2")
 
-            """
-            self.windowLog.insert(0.0, load_response)
-            self.windowLog.insert(0.0, "\n")
-            """
+            x = time.time()
+            x = x - self.starttime
+            y1 = val1
+            y2 = val2
+
+            self.load_c1_x.append(x)
+            self.load_c1_y.append(y1)
+            self.load_c2_y.append(y2)
+
+            self.plot(self.load_c1_x, self.load_c1_y, 0)
+            self.plot(self.load_c1_x, self.load_c2_y, 1)
 
 
     def GetClock(self):
+        if self.prev_button_state != Buttons.CLOCK:
+            self.reset()
+            self.prev_button_state = Buttons.CLOCK
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
-            print("connecting again...")
+            # print("connecting again...")
             sock.connect((IP, PORT))
 
             # request cpu load data from the server
             request = {"type": "request",
                        "param": "clock_speeds"}
-            print(f"client sent: {request}")
+            # print(f"client sent: {request}")
             sock.sendall(bytes(json.dumps(request), "utf-8"))
-            print("load request sent...")
+            # print("load request sent...")
 
             # Receive load data from the server
-            load_response = str(sock.recv(2048), "utf-8")
-            print(f"server load received: {load_response}")
+            response = str(sock.recv(2048), "utf-8")
 
-            self.windowLog.insert(0.0, load_response)
-            self.windowLog.insert(0.0, "\n")
+            val1 = self.extract_value_message(response, "CPU Core #1")
+            val2 = self.extract_value_message(response, "CPU Core #2")
+            val3 = self.extract_value_message(response, "Bus Speed")
 
-    def plot(self, canvas, ax):
-        x = epoch_time = (time.time())
-        x = x - self.starttime
-        y = np.random.random()
-        ax.plot(x,y, color='red', marker='o', linestyle='dashed', linewidth=2, markersize=6)
-        canvas.draw()
+            x = time.time()
+            x = x - self.starttime
+            y1 = val1
+            y2 = val2
+            y3 = val3
 
-    def reset(self, canvas, ax):
-        ax.clear()
+            self.clock_c1_x.append(x)
+            self.clock_c1_y.append(y1)
+            self.clock_c2_y.append(y2)
+            self.clock_bs_y.append(y3)
+
+            self.plot(self.clock_c1_x, self.clock_c1_y, 0)
+            self.plot(self.clock_c1_x, self.clock_c2_y, 1)
+            self.plot(self.clock_c1_x, self.clock_bs_y, 2)
+
+
+    def plot(self, x, y, id):
+        if id == 0:
+            self.ax0.plot(x, y, color='blue', marker='o', linestyle='dashed', linewidth=1, markersize=3)
+        elif id == 1:
+            self.ax1.plot(x, y, color='red', marker='o', linestyle='dashed', linewidth=1, markersize=3)
+        elif id == 2:
+            self.ax2.plot(x, y, color='green', marker='o', linestyle='dashed', linewidth=1, markersize=3)
+        self.canvas.draw()
+
+    def reset(self):
+        # --- clears all data from graph
+        self.ax0.clear()
+        self.ax1.clear()
+        self.ax2.clear()
         self.starttime = (time.time())
-        canvas.draw()
+        self.canvas.draw()
+        # clears temp data
+        self.temp_c1_x.clear()
+        self.temp_c1_y.clear()
+        self.temp_c2_y.clear()
+        # clears load data
+        self.load_c1_x.clear()
+        self.load_c1_y.clear()
+        self.load_c2_y.clear()
+        # clears clock data
+        self.clock_c1_x.clear()
+        self.clock_c1_y.clear()
+        self.clock_c2_y.clear()
+        self.clock_bs_y.clear()
 
 
 if __name__ == '__main__':
