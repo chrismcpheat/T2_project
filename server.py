@@ -18,14 +18,14 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
         super(TCPRequestHandler, self).__init__(request, client_address, server)
 
     def handle(self):
-        time.sleep(1)
+        # time.sleep(1)
         """
         The request handler class.
         """
         print("client data incoming...")
         #  self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip().decode("utf-8")  # NB bytes to string
-        print(f"data received: {self.data}")
+        # print(f"data received: {self.data}")
 
         # request OHM data
         requested_data = {}
@@ -39,7 +39,7 @@ class TCPRequestHandler(socketserver.BaseRequestHandler):
             elif request['param'] == "cpu_core_load":
                 requested_data = my_ohm.get_core_loads()
 
-        print(requested_data)
+        # print(requested_data)
         # return the data to the client
         response = json.dumps(requested_data)
         self.request.sendall(response.encode('utf-8'))
