@@ -11,6 +11,7 @@ from functools import partial
 import time
 import numpy as np
 import matplotlib as mpl
+from matplotlib import style
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.patches as mpatches
@@ -18,17 +19,15 @@ import warnings
 import matplotlib.cbook
 warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 
-# custom font formats
+
+# style of graph
+style.use("ggplot")
+# bg colours
+BG_COLOUR = "#f7f7f7"
+# fonts
 LARGE_FONT = ("Arial", 10, "bold") # for headings
 SMALL_FONT = ("Arial", 8) # for 'About' window
-BG_COLOUR = "#f7f7f7" # bg colour for all frames/windows
 
-# -----------------------------
-
-# LAST TIME: colours for graphs etc
-# TO DO: threading, run automatically
-
-# -----------------------------
 
 # last pushed button
 # changes state to value of button, to prevent data being reset/cleared if the button pushed is the same as the last
@@ -38,10 +37,6 @@ LastPush = enum(TEMP='temp', LOAD='load', CLOCK='clock', POWER='power')
 
 # GUI class
 class ClientApp(tkinter.Frame):
-
-    # test function for dropdown menu
-    def doNothing(self):
-        print("TESTING")
 
     # init method - creates window, sets bg colour, starts timer to plot on X axis
     def __init__(self, master=None):
@@ -204,7 +199,7 @@ class ClientApp(tkinter.Frame):
             label_x = 'Time (s)'
             label_y = 'Temperature (°C)'
             legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='red', label='CPU Core #2')
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
 
             plt.legend(handles=[legend_0, legend_1])
             plt.xlabel(label_x, fontsize=8, labelpad=10)
@@ -251,8 +246,8 @@ class ClientApp(tkinter.Frame):
 
             label_x = 'Time (s)'
             label_y = 'Load (%)'
-            legend_0 = mpatches.Patch(color='blue', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='red', label='CPU Core #2')
+            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
 
             plt.legend(handles=[legend_0, legend_1])
             plt.xlabel(label_x, fontsize=8, labelpad=10)
@@ -299,10 +294,10 @@ class ClientApp(tkinter.Frame):
 
             label_x = 'Time (s)'
             label_y = 'Power (W)'
-            legend_0 = mpatches.Patch(color='blue', label='DRAM')
-            legend_1 = mpatches.Patch(color='red', label='Package')
-            legend_2 = mpatches.Patch(color='green', label='Cores')
-            legend_3 = mpatches.Patch(color='yellow', label='Graphics')
+            legend_0 = mpatches.Patch(color='#5B76AC', label='DRAM')
+            legend_1 = mpatches.Patch(color='#F96B6F', label='Package')
+            legend_2 = mpatches.Patch(color='#16A28F', label='Cores')
+            legend_3 = mpatches.Patch(color='#EAA846', label='Graphics')
 
             plt.legend(handles=[legend_0, legend_1, legend_2, legend_3])
             plt.xlabel(label_x, fontsize=8, labelpad=10)
@@ -349,9 +344,9 @@ class ClientApp(tkinter.Frame):
 
             label_x = 'Time (s)'
             label_y = 'Rate (MHz)'
-            legend_0 = mpatches.Patch(color='blue', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='red', label='CPU Core #2')
-            legend_2 = mpatches.Patch(color='green', label='Bus Speed')
+            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
+            legend_2 = mpatches.Patch(color='#16A28F', label='Bus Speed')
 
             plt.legend(handles=[legend_0, legend_1, legend_2])
             plt.xlabel(label_x, fontsize=8, labelpad=10)
@@ -365,13 +360,13 @@ class ClientApp(tkinter.Frame):
     def PlotData(self, x, y, id):
 
         if id == 0:
-            self.ax0.plot(x, y, color='#5B76AC', marker='o', linestyle='solid', linewidth=1, markersize=2) # blue
+            self.ax0.plot(x, y, color='#5B76AC', marker='.', linestyle='solid', linewidth=2, markersize=0) # blue
         elif id == 1:
-            self.ax1.plot(x, y, color='#F96B6F', marker='o', linestyle='solid', linewidth=1, markersize=2) # red
+            self.ax1.plot(x, y, color='#F96B6F', marker='.', linestyle='solid', linewidth=2, markersize=0) # red
         elif id == 2:
-            self.ax2.plot(x, y, color='#21ff21', marker='o', linestyle='solid', linewidth=1, markersize=2)
+            self.ax2.plot(x, y, color='#16A28F', marker='.', linestyle='solid', linewidth=2, markersize=0) # green
         elif id == 3:
-            self.ax3.plot(x, y, color='#fff721', marker='o', linestyle='solid', linewidth=1, markersize=2)
+            self.ax3.plot(x, y, color='#EAA846', marker='.', linestyle='solid', linewidth=2, markersize=0) # yellow
         self.canvas.draw()
 
     # function clears the graph
