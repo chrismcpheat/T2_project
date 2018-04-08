@@ -1,96 +1,73 @@
+# ------ References
+# http://openhardwaremonitor.org/wordpress/wp-content/uploads/2011/04/OpenHardwareMonitor-WMI.pdf
+# https://docs.python.org/2/library/socket.html
+# https://wiki.python.org/moin/TcpCommunication#Client
+
 import wmi
 
 debug = False
 
-
+# OHM class for retreiving hardware/sensor data
 class OHM:
-
+    # initiliases OHM application
     def __init__(self):
         self.hwmon = wmi.WMI(namespace="root\OpenHardwareMonitor")
 
-
+    # when "Temperature" button is pressed on Client
     def get_core_temps(self):
-        data = {}
-        sensors_temp = self.hwmon.Sensor(["Name", "Parent", "Value", "Identifier", "SensorType", "Max"],
-                                         SensorType="Temperature")
-        if debug:
-            print(sensors_temp)
+        data = {} # create empty list
+        sensors_temp = self.hwmon.Sensor(["Name", "Parent", "Value", "Identifier", "SensorType", "Max"]) # sensor protocols for OHM
 
         for temperature in sensors_temp:
 
-            if debug:
-                print("temperature object")
-                print(temperature)
-
             if (temperature.Identifier.find("ram") == -1) and (temperature.Identifier.find("hdd") == -1) \
                     and (temperature.Name.find("Package") == -1):
-                if debug:
-                    print("cpu temperature values")
-                    print(f"{temperature.value}, {temperature.max}, {temperature.name}")
 
-                data['type'] = "cpu temperature"
+                data['type'] = "cpu temperature" # sensor protocols for OHM
                 data[temperature.name] = temperature.value
-
+        # returns CPU temperature data to server
         return data
 
-
+    # when "Load" button is pressed on Client
     def get_core_loads(self):
         data = {}
-        sensors_load = self.hwmon.Sensor(SensorType="Load")
-
-        if debug:
-            print(sensors_load)
+        sensors_load = self.hwmon.Sensor(SensorType="Load") # sensor protocols for OHM
 
         for load in sensors_load:
             if (load.Identifier.find("ram") == -1) and (load.Identifier.find("hdd") == -1) and (
                     load.Name.find("Total") == -1):
 
-                if debug:
-                    print(f"{load.value}, {load.name}")
-
-                data['type'] = "cpu load"
+                data['type'] = "cpu load" # sensor protocols for OHM
                 data[load.name] = load.value
-
+        # returns CPU load time data to server
         return data
 
-
+    # when "Power" button is pressed on Client
     def get_core_powers(self):
         data = {}
-        sensors_power = self.hwmon.Sensor(SensorType="Power")
-
-        if debug:
-            print(sensors_power)
+        sensors_power = self.hwmon.Sensor(SensorType="Power") # sensor protocols for OHM
 
         for power in sensors_power:
             if (power.Identifier.find("ram") == -1) and (power.Identifier.find("hdd") == -1) and (
                     power.Name.find("Total") == -1):
 
-                if debug:
-                    print(f"{power.value}, {power.name}")
-
-                data['type'] = "cpu powers"
+                data['type'] = "cpu powers" # sensor protocols for OHM
                 data[power.name] = power.value
-
+        # returns cpu powers data to server
         return data
 
-
+    # when "Clock Speed" button is pressed on Client
     def get_clock_speeds(self):
         data = {}
-        sensors_speed = self.hwmon.Sensor(SensorType="Clock")
-
-        if debug:
-            print(sensors_speed)
+        sensors_speed = self.hwmon.Sensor(SensorType="Clock") # sensor protocols for OHM
 
         for speed in sensors_speed:
             if (speed.Identifier.find("ram") == -1) and (speed.Identifier.find("hdd") == -1) and (
                     speed.Name.find("Total") == -1):
 
-                if debug:
-                    print(f"{speed.value}, {speed.name}")
-
-                data['type'] = "clock speeds"
+                data['type'] = "clock speeds" # sensor protocols for OHM
                 data[speed.name] = speed.value
-
+        # returns clock speed data to server
         return data
 
 

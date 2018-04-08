@@ -1,5 +1,25 @@
+# ------ References
 # https://www.youtube.com/watch?v=gjU3Lx8XMS8
 # https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
+# https://stackoverflow.com/questions/16782047/how-to-add-an-icon-of-my-own-to-a-python-program
+# https://www.youtube.com/playlist?list=PL6gx4Cwl9DGBwibXFtPtflztSNPGuIB_d
+# https://stackoverflow.com/questions/18537918/set-window-icon
+# https://stackoverflow.com/questions/1526747/ideal-size-for-ico
+# https://www.youtube.com/watch?v=PSm-tq5M-Dc&list=PL6gx4Cwl9DGBwibXFtPtflztSNPGuIB_d&index=9
+# https://matplotlib.org/gallery/user_interfaces/embedding_in_tk_canvas_sgskip.html
+# https://pythonprogramming.net/tkinter-depth-tutorial-making-actual-program/
+# https://stackoverflow.com/questions/31440167/placing-plot-on-tkinter-main-window-in-python
+# https://stackoverflow.com/questions/4073660/python-tkinter-embed-matplotlib-in-gui
+# https://stackoverflow.com/questions/2395431/using-tkinter-in-python-to-edit-the-title-bar
+# https://pythonprogramming.net/embedding-live-matplotlib-graph-tkinter-gui/
+# https://stackoverflow.com/questions/46495160/make-a-label-bold-tkinter
+# https://matplotlib.org/users/text_intro.html
+# https://matplotlib.org/users/legend_guide.html
+# https://matplotlib.org/api/_as_gen/matplotlib.lines.Line2D.html
+# https://stackoverflow.com/questions/12444716/how-do-i-set-the-figure-title-and-axes-labels-font-size-in-matplotlib
+# https://docs.python.org/2/library/socket.html
+# https://wiki.python.org/moin/TcpCommunication#Client
+# https://docs.python.org/2/library/json.html
 
 import socket
 import json
@@ -18,15 +38,13 @@ import matplotlib.patches as mpatches
 import warnings
 import matplotlib.cbook
 warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+# https://stackoverflow.com/questions/24502500/python-matplotlib-getting-rid-of-matplotlib-mpl-warning
 
 
-# style of graph
-style.use("ggplot")
-# bg colours
-BG_COLOUR = "#f7f7f7"
-# fonts
-LARGE_FONT = ("Arial", 10, "bold") # for headings
-SMALL_FONT = ("Arial", 8) # for 'About' window
+style.use("ggplot") # style of graph
+BG_COLOUR = "#f7f7f7" # bg colours
+LARGE_FONT = ("Arial", 10, "bold") # large font for headings
+SMALL_FONT = ("Arial", 8) # smaller font for 'About' window
 
 
 # last pushed button
@@ -170,60 +188,54 @@ class ClientApp(tkinter.Frame):
     # function is called when 'Temperature' button is pressed
     def GetTemp(self):
 
-        if self.prev_button_state != LastPush.TEMP:
+        if self.prev_button_state != LastPush.TEMP: # if last button pushed was not temperature, then reset graph
             self.ResetData()
-            self.prev_button_state = LastPush.TEMP
+            self.prev_button_state = LastPush.TEMP # set last push to temperature
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
-            sock.connect((IP, PORT))
+            sock.connect((IP, PORT)) # import IP and port from tcp_settings module
 
             # request cpu temperature data from the server
             request = {"type": "request",
                        "param": "cpu_core_temp"}
             sock.sendall(bytes(json.dumps(request), "utf-8"))
 
+            # receives response from server
             response = str(sock.recv(1024), "utf-8")
-            val1 = self.ExtractResponse(response, "CPU Core #1")
-            val2 = self.ExtractResponse(response, "CPU Core #2")
+            val1 = self.ExtractResponse(response, "CPU Core #1") # cpu core #1 data
+            val2 = self.ExtractResponse(response, "CPU Core #2") # cpu core #2 data
 
-            x = time.time()
+            x = time.time() # x axis is the time
             x = x - self.starttime
-            y1 = val1
-            y2 = val2
+            y1 = val1 # for plotting cpu core #1 data on y axis
+            y2 = val2 # for plotting cpu core #2 data on y axis
 
-            self.temp_c1_x.append(x)
-            self.temp_c1_y.append(y1)
-            self.temp_c2_y.append(y2)
+            self.temp_c1_x.append(x) # append time to list
+            self.temp_c1_y.append(y1) # append cpu core #1 data to list
+            self.temp_c2_y.append(y2) # append cpu core #2 data to list
 
-            label_x = 'Time (s)'
-            label_y = 'Temperature (°C)'
-            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
+            label_x = 'Time (s)' # sets x label
+            label_y = 'Temperature (°C)' # sets y label
+            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1') # sets legend colour core #1
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2') # sets legend colour core #2
 
-            plt.legend(handles=[legend_0, legend_1])
-            plt.xlabel(label_x, fontsize=8, labelpad=10)
-            plt.ylabel(label_y, fontsize=7, labelpad=10)
+            plt.legend(handles=[legend_0, legend_1]) # plots the legend to the graph
+            plt.xlabel(label_x, fontsize=8, labelpad=10) # plot x axis label to graph
+            plt.ylabel(label_y, fontsize=7, labelpad=10) # plot y axis label to graph
 
-            """
-            # ------ attempting to place legend outside - not working
-            legend_0 = mpatches.Patch(color='red', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='blue', label='CPU Core #2')
-            plt.legend(handles=[legend_0, legend_1], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-            """
-
-            self.PlotData(self.temp_c1_x, self.temp_c1_y, 0)
-            self.PlotData(self.temp_c1_x, self.temp_c2_y, 1)
+            self.PlotData(self.temp_c1_x, self.temp_c1_y, 0) # plot data to graph
+            self.PlotData(self.temp_c1_x, self.temp_c2_y, 1) # plot data to graph
 
     # function is called when 'Load' button is pressed
     def GetLoad(self):
-        if self.prev_button_state != LastPush.LOAD:
+        if self.prev_button_state != LastPush.LOAD: # if last button pushed was not load, then reset graph
             self.ResetData()
-            self.prev_button_state = LastPush.LOAD
+            self.prev_button_state = LastPush.LOAD # set last push to load
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
-            sock.connect((IP, PORT))
+            sock.connect((IP, PORT)) # import IP and port from tcp_settings module
 
             # request cpu load data from the server
             request = {"type": "request",
@@ -232,39 +244,39 @@ class ClientApp(tkinter.Frame):
 
             # Receive load data from the server
             response = str(sock.recv(2048), "utf-8")
-            val1 = self.ExtractResponse(response, "CPU Core #1")
-            val2 = self.ExtractResponse(response, "CPU Core #2")
+            val1 = self.ExtractResponse(response, "CPU Core #1") # core #1 data
+            val2 = self.ExtractResponse(response, "CPU Core #2") # core #2 data
 
-            x = time.time()
+            x = time.time() # x axis is time
             x = x - self.starttime
-            y1 = val1
-            y2 = val2
+            y1 = val1 # for plotting core #1 on y axis
+            y2 = val2 # for plotting core #2 on y axis
 
-            self.load_c1_x.append(x)
-            self.load_c1_y.append(y1)
-            self.load_c2_y.append(y2)
+            self.load_c1_x.append(x) # append time to list
+            self.load_c1_y.append(y1) # append core #1 to list
+            self.load_c2_y.append(y2) # append core #2 to list
 
-            label_x = 'Time (s)'
-            label_y = 'Load (%)'
-            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
+            label_x = 'Time (s)' # x axis label
+            label_y = 'Load (%)' # y axis label
+            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1') # legenbd colour core #1
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2') # legend colour core #2
 
-            plt.legend(handles=[legend_0, legend_1])
-            plt.xlabel(label_x, fontsize=8, labelpad=10)
-            plt.ylabel(label_y, fontsize=8, labelpad=10)
+            plt.legend(handles=[legend_0, legend_1]) # plot legend to graph
+            plt.xlabel(label_x, fontsize=8, labelpad=10) # plot x axis label to graph
+            plt.ylabel(label_y, fontsize=8, labelpad=10) # plot y axis label to graph
 
-            self.PlotData(self.load_c1_x, self.load_c1_y, 0)
-            self.PlotData(self.load_c1_x, self.load_c2_y, 1)
+            self.PlotData(self.load_c1_x, self.load_c1_y, 0) # plot data to graph
+            self.PlotData(self.load_c1_x, self.load_c2_y, 1) # plot data to graph
 
     # function is called when 'Power' button is pressed
     def GetPower(self):
-        if self.prev_button_state != LastPush.POWER:
+        if self.prev_button_state != LastPush.POWER: # if last button pushed was not power, then reset graph
             self.ResetData()
-            self.prev_button_state = LastPush.POWER
+            self.prev_button_state = LastPush.POWER # set last push to power
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
-            sock.connect((IP, PORT))
+            sock.connect((IP, PORT)) # import IP and port from tcp_settings module
 
             # request cpu load data from the server
             request = {"type": "request",
@@ -274,50 +286,50 @@ class ClientApp(tkinter.Frame):
             # Receive load data from the server
             response = str(sock.recv(2048), "utf-8")
 
-            val1 = self.ExtractResponse(response, "CPU DRAM")
-            val2 = self.ExtractResponse(response, "CPU Package")
-            val3 = self.ExtractResponse(response, "CPU Cores")
-            val4 = self.ExtractResponse(response, "CPU Graphics")
+            val1 = self.ExtractResponse(response, "CPU DRAM") # cpu dram data
+            val2 = self.ExtractResponse(response, "CPU Package") # cpu package data
+            val3 = self.ExtractResponse(response, "CPU Cores") # cpu cores data
+            val4 = self.ExtractResponse(response, "CPU Graphics") # cpu graphics data
 
-            x = time.time()
+            x = time.time() # x axis is time
             x = x - self.starttime
-            y1 = val1
-            y2 = val2
-            y3 = val3
-            y4 = val4
+            y1 = val1 # for plotting cpu dram to graph
+            y2 = val2 # for plotting cpu package to graph
+            y3 = val3 # for plotting cpu cores to graph
+            y4 = val4 # for plotting cpu graphics to graph
 
-            self.power_cd_x.append(x)
-            self.power_cd_y.append(y1)
-            self.power_cp_y.append(y2)
-            self.power_cc_y.append(y3)
-            self.power_cg_y.append(y4)
+            self.power_cd_x.append(x) # append time to list
+            self.power_cd_y.append(y1) # append dram data to list
+            self.power_cp_y.append(y2) # append package data to list
+            self.power_cc_y.append(y3) # append cores data to graph
+            self.power_cg_y.append(y4) # append graphics data to graph
 
-            label_x = 'Time (s)'
-            label_y = 'Power (W)'
-            legend_0 = mpatches.Patch(color='#5B76AC', label='DRAM')
-            legend_1 = mpatches.Patch(color='#F96B6F', label='Package')
-            legend_2 = mpatches.Patch(color='#16A28F', label='Cores')
-            legend_3 = mpatches.Patch(color='#EAA846', label='Graphics')
+            label_x = 'Time (s)' # sets x axis label
+            label_y = 'Power (W)' # sets y axis label
+            legend_0 = mpatches.Patch(color='#5B76AC', label='DRAM') # legend colour dram
+            legend_1 = mpatches.Patch(color='#F96B6F', label='Package') # legend colour package
+            legend_2 = mpatches.Patch(color='#16A28F', label='Cores') # legend colour cores
+            legend_3 = mpatches.Patch(color='#EAA846', label='Graphics') # legend colour graphics
 
-            plt.legend(handles=[legend_0, legend_1, legend_2, legend_3])
-            plt.xlabel(label_x, fontsize=8, labelpad=10)
-            plt.ylabel(label_y, fontsize=8, labelpad=10)
+            plt.legend(handles=[legend_0, legend_1, legend_2, legend_3]) # plots legend to graph
+            plt.xlabel(label_x, fontsize=8, labelpad=10) # plots x axis label to graph
+            plt.ylabel(label_y, fontsize=8, labelpad=10) # plots y axis label to graph
 
 
-            self.PlotData(self.power_cd_x, self.power_cd_y, 0)
-            self.PlotData(self.power_cd_x, self.power_cp_y, 1)
-            self.PlotData(self.power_cd_x, self.power_cc_y, 2)
-            self.PlotData(self.power_cd_x, self.power_cg_y, 3)
+            self.PlotData(self.power_cd_x, self.power_cd_y, 0) # plot data to graph
+            self.PlotData(self.power_cd_x, self.power_cp_y, 1) # plot data to graph
+            self.PlotData(self.power_cd_x, self.power_cc_y, 2) # plot data to graph
+            self.PlotData(self.power_cd_x, self.power_cg_y, 3) # plot data to graph
 
     # function is called when 'Clock Speed' button is pressed
     def GetClock(self):
-        if self.prev_button_state != LastPush.CLOCK:
+        if self.prev_button_state != LastPush.CLOCK: # if last button pushed was not clock speed, then reset graph
             self.ResetData()
-            self.prev_button_state = LastPush.CLOCK
+            self.prev_button_state = LastPush.CLOCK # sets last push to clock speed
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Connect to server and send data
-            sock.connect((IP, PORT))
+            sock.connect((IP, PORT)) # import IP and port from tcp_settings module
 
             # request cpu load data from the server
             request = {"type": "request",
@@ -327,38 +339,38 @@ class ClientApp(tkinter.Frame):
             # Receive load data from the server
             response = str(sock.recv(2048), "utf-8")
 
-            val1 = self.ExtractResponse(response, "CPU Core #1")
-            val2 = self.ExtractResponse(response, "CPU Core #2")
-            val3 = self.ExtractResponse(response, "Bus Speed")
+            val1 = self.ExtractResponse(response, "CPU Core #1") # cpu core #1 data
+            val2 = self.ExtractResponse(response, "CPU Core #2") # cpu core #2 data
+            val3 = self.ExtractResponse(response, "Bus Speed") # bus speed data
 
-            x = time.time()
+            x = time.time() # x axis is the time
             x = x - self.starttime
-            y1 = val1
-            y2 = val2
-            y3 = val3
+            y1 = val1 # for plotting core #1 to graph
+            y2 = val2 # for plotting core #2 to graph
+            y3 = val3 # for plotting bus speed to graph
 
-            self.clock_c1_x.append(x)
-            self.clock_c1_y.append(y1)
-            self.clock_c2_y.append(y2)
-            self.clock_bs_y.append(y3)
+            self.clock_c1_x.append(x) # appends time to list
+            self.clock_c1_y.append(y1) # append core #1 to list
+            self.clock_c2_y.append(y2) # append core #2 to list
+            self.clock_bs_y.append(y3) # append bus speed to list
 
-            label_x = 'Time (s)'
-            label_y = 'Rate (MHz)'
-            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1')
-            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2')
-            legend_2 = mpatches.Patch(color='#16A28F', label='Bus Speed')
+            label_x = 'Time (s)' # x axis label
+            label_y = 'Rate (MHz)' # y axis label
+            legend_0 = mpatches.Patch(color='#5B76AC', label='CPU Core #1') # sets legend colour core #1
+            legend_1 = mpatches.Patch(color='#F96B6F', label='CPU Core #2') # sets legend colour core #2
+            legend_2 = mpatches.Patch(color='#16A28F', label='Bus Speed') # sets legend colour bus speed
 
-            plt.legend(handles=[legend_0, legend_1, legend_2])
-            plt.xlabel(label_x, fontsize=8, labelpad=10)
-            plt.ylabel(label_y, fontsize=8, labelpad=10)
+            plt.legend(handles=[legend_0, legend_1, legend_2]) # plot legend to graph
+            plt.xlabel(label_x, fontsize=8, labelpad=10) # plot x axis label to graph
+            plt.ylabel(label_y, fontsize=8, labelpad=10) # plot y axis label to graph
 
-            self.PlotData(self.clock_c1_x, self.clock_c1_y, 0)
-            self.PlotData(self.clock_c1_x, self.clock_c2_y, 1)
-            self.PlotData(self.clock_c1_x, self.clock_bs_y, 2)
+            self.PlotData(self.clock_c1_x, self.clock_c1_y, 0) # plot data to graph
+            self.PlotData(self.clock_c1_x, self.clock_c2_y, 1) # plot data to graph
+            self.PlotData(self.clock_c1_x, self.clock_bs_y, 2) # plot data to graph
 
-    # function polts data to the graph
+    # function plots data to the graph
     def PlotData(self, x, y, id):
-
+    # multiple plots to the graph
         if id == 0:
             self.ax0.plot(x, y, color='#5B76AC', marker='.', linestyle='solid', linewidth=2, markersize=0) # blue
         elif id == 1:
